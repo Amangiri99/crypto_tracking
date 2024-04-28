@@ -3,9 +3,10 @@ import requests
 import json
 from decouple import config
 
-from apps.scraper import scraper as scrappers 
+from apps.scraper import scraper as scrappers
 
-logger = logging.getLogger('Scrapper Tasks')
+logger = logging.getLogger("Scrapper Tasks")
+
 
 def scrape_data_from_coin_market():
     """
@@ -18,11 +19,11 @@ def scrape_data_from_coin_market():
     response = requests.post(
         url=config("APPLICATION_ENDPOINT"),
         data=payload,
-        headers={'Content-Type': 'application/json'}
+        headers={"Content-Type": "application/json"},
     )
     if response.status_code != 200:
         logger.error(
             "['SCRAPE COIN MARKET TASK'] Response other than 200 received",
-            extra={"status_code": response.status_code, "details": response.json()}
+            extra={"status_code": response.status_code, "details": response.json()},
         )
     logger.info("Task Completed")

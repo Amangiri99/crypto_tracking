@@ -2,8 +2,9 @@ from rest_framework import generics as rest_generics
 
 from apps.crypto_tracker import (
     serializers as crypto_tracker_serializers,
-    models as crypto_tracker_models
+    models as crypto_tracker_models,
 )
+
 
 class CryptoDetailsView(rest_generics.ListCreateAPIView):
     """
@@ -17,7 +18,7 @@ class CryptoDetailsView(rest_generics.ListCreateAPIView):
         # Override serializer class to pass the serializer based on the request method.
         serializer_methods = {
             "POST": crypto_tracker_serializers.BulkCryptoDetailsSerializer,
-            "GET": crypto_tracker_serializers.CryptoDetailsSerializer
+            "GET": crypto_tracker_serializers.CryptoDetailsSerializer,
         }
         return serializer_methods[self.request.method.upper()]
 

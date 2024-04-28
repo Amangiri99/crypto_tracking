@@ -7,6 +7,7 @@ class CryptoDetail(commons_models.TimeStampBaseModel):
     """
     Class to store information about the crypto.
     """
+
     name = models.CharField(max_length=128)
     short_name = models.CharField(max_length=16)
     price = models.CharField(max_length=32)
