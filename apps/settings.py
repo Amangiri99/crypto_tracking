@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'corsheaders',
     'django_celery_beat',
+    'rest_framework',
 
     'apps.commons',
     'apps.crypto_tracker',
@@ -139,3 +140,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BROKER_URL = config('BROKER_URL')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000

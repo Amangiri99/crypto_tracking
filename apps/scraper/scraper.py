@@ -1,5 +1,4 @@
 import logging
-import time
 from pathlib import Path
 from decouple import config
 
@@ -96,7 +95,7 @@ class CoinMarketScraper(BaseWebScraper):
                 name, short_name = crypto_parser.get_name()
                 trade_in_dollars, trade_in_crypto = crypto_parser.get_volume()
                 crypto_info = {
-                    'full_name': name,
+                    'name': name,
                     'short_name': short_name,
                     'price': crypto_parser.get_price(),
                     'one_hour_change': crypto_parser.get_one_hour_change(),
@@ -124,7 +123,7 @@ class CoinMarketScraper(BaseWebScraper):
         # Continue till we reach the last page
         while True:
             # Scrape the current page
-            list_of_all_cryptos.append(self.__scrape_coin_market())
+            list_of_all_cryptos.extend(self.__scrape_coin_market())
             current_page = current_page + 1
             # Head on to the next page.
             self.get_web_driver_instance(query_params=f"page={current_page}")
