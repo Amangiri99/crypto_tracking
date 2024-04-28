@@ -67,7 +67,7 @@ class CoinMarketParser:
         """
         crypto_market_cap = self.htmlElement.find_element(By.CSS_SELECTOR, "td:nth-of-type(8)")
         return crypto_market_cap.text
-    
+
     def get_volume(self):
         """
         Parse the crypto volume relative to dollar and the coin cap from html elements

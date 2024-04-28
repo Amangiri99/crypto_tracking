@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_celery_beat',
 
+    'apps.commons',
     'apps.crypto_tracker',
-    'apps.scraper'
+    'apps.scraper',
 ]
 
 MIDDLEWARE = [
