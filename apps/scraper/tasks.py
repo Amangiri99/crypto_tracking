@@ -3,11 +3,12 @@ import requests
 import json
 from decouple import config
 
+from apps.celery import app
 from apps.scraper import scraper as scrappers
 
 logger = logging.getLogger("Scrapper Tasks")
 
-
+@app.task
 def scrape_data_from_coin_market():
     """
     Task to scrape data from coin market at intervals
@@ -20,8 +21,9 @@ def scrape_data_from_coin_market():
         url=config("APPLICATION_ENDPOINT"),
         data=payload,
         headers={"Content-Type": "application/json"},
+        timeout=30
     )
-    if response.status_code != 200:
+    if response.status_code != 201:
         logger.error(
             "['SCRAPE COIN MARKET TASK'] Response other than 200 received",
             extra={"status_code": response.status_code, "details": response.json()},

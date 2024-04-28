@@ -26,4 +26,4 @@ class CryptoDetailsView(rest_generics.ListCreateAPIView):
         """
         Returns a queryset of a list of items for this view.
         """
-        return crypto_tracker_models.CryptoDetail.objects.all()
+        return crypto_tracker_models.CryptoDetail.objects.all().order_by('name')

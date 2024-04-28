@@ -133,10 +133,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-# CELERY CONFIGURATION
-BROKER_URL = config("BROKER_URL")
-CELERY_ACCEPT_CONTENT = ["application/json"]
-CELERY_TASK_SERIALIZER = "json"
-
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
