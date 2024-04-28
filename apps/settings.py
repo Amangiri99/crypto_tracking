@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'corsheaders',
+    'django_celery_beat',
 
     'apps.crypto_tracker',
-    'apps.scrapper'
+    'apps.scraper'
 ]
 
 MIDDLEWARE = [
