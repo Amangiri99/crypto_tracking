@@ -9,7 +9,9 @@
 ## Steps to be followed
 1. Copy the .env.example and create a .env file.
 2. Update the secrets.
-3. Use the below commands to get the service up and running.
+3. Run `pipenv shell` to create a virtual env.
+4. Run `pipenv install` in order to install all dependencies.
+5. Use the below commands to get the service up and running.
 
 ## Commands to run the service
 - To get all db migrations in place: `python manage.py migrate`
