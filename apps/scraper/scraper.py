@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from decouple import config
 
 from selenium import webdriver
@@ -18,16 +17,17 @@ class BaseWebScraper:
     """
 
     def __init__(self, url):
-        self.webdriver_path = (
-            Path(__file__).resolve().parent.parent.parent / "chromedriver"
-        )
-        self.driver = webdriver.Chrome()
+        self.webdriver_path = (f"{config('SELENIUM_DRIVER_PATH')}/chromedriver")
+        self.driver = None
         self.url = url
 
     def get_web_driver_instance(self, query_params=""):
         """
         Function to open the requested site using the driver
         """
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        self.driver = webdriver.Chrome(options=options)
         return self.driver.get(f"{self.url}/?{query_params}")
 
     def quit_driver_instance(self):
