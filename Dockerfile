@@ -17,7 +17,7 @@ RUN pip install pipenv
 
 # Install project dependencies
 COPY Pipfile Pipfile.lock ./
-RUN pipenv install --dev --ignore-pipfile --system
+RUN pipenv install --ignore-pipfile --system
 
 # Expose port 8000 in the container
 EXPOSE 8000
