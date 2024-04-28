@@ -1,6 +1,6 @@
 # crypto_tracker
 
-## Screaps data from coin market cap using selenium
+## Scrapes data from coin market cap using selenium
 
 ## To use 
 1. Setup postgres
