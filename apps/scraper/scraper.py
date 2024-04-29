@@ -2,13 +2,14 @@ import logging
 from decouple import config
 
 from selenium import webdriver
+from selenium.common import exceptions as selenium_exceptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from apps.scraper import parser as scraper_parsers
 
-logger = logging.getLogger("Scrapper")
+logger = logging.getLogger("Scraper")
 
 
 class BaseWebScraper:
@@ -27,8 +28,17 @@ class BaseWebScraper:
         """
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
-        self.driver = webdriver.Chrome(options=options)
-        return self.driver.get(f"{self.url}/?{query_params}")
+        try:
+            self.driver = webdriver.Chrome(options=options)
+            self.driver.get(f"{self.url}/?{query_params}")
+        except selenium_exceptions.NoSuchDriverException as e:
+            logger.exception(
+                "[Base Web Scraper] Driver Exception while initializing web driver", exc_info=True, extra={"exception": str(e)}
+            )
+        except Exception as e:
+            logger.exception(
+                "[Base Web Scraper] Exception while initializing web driver", exc_info=True, extra={"exception": str(e)}
+            )
 
     def quit_driver_instance(self):
         """
@@ -48,7 +58,7 @@ class CoinMarketScraper(BaseWebScraper):
         self.batch_size_to_process = config("SCRAPING_BATCH_SIZE", cast=int)
         super().__init__(url=config("COIN_MARKET_URL"))
 
-    def scroll_down(self, new_height):
+    def scroll_page(self, new_height):
         """
         Function to scroll down the page using JavaScript.
         """
@@ -65,9 +75,9 @@ class CoinMarketScraper(BaseWebScraper):
         """
         return self.driver.execute_script("return document.body.scrollHeight")
 
-    def __scrape_coin_market(self):
+    def scrape_coin_market(self):
         """
-        Function to parse the response received from the external source.
+        Function to parse a single page at a time and create alist with all details.
         """
         # Using the total page length calculate the scroll speed.
         total_iterations = self.total_rows_per_page / self.batch_size_to_process - 1
@@ -78,7 +88,7 @@ class CoinMarketScraper(BaseWebScraper):
         while num_of_iterations < total_iterations:
             new_height = num_of_iterations * scroll_increment
             # Scroll the page down
-            self.scroll_down(new_height)
+            self.scroll_page(new_height)
             # Explicit wait until the next batch of rows is loaded
             WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located(
@@ -91,56 +101,78 @@ class CoinMarketScraper(BaseWebScraper):
                 )
             )
 
-            # Selecting the table based on the css class.
-            crypto_details_table = self.driver.find_element(
-                By.CSS_SELECTOR, ".cmc-table"
-            )
-            # Selecting the table body that contains all the details about the crypto coins.
-            crypto_details_table_body = crypto_details_table.find_element(
-                By.TAG_NAME, "tbody"
-            )
-            crypto_details = crypto_details_table_body.find_elements(By.TAG_NAME, "tr")
-            # Iterating in batches, to parse the crypto coins
-            crypto_parsed_html = crypto_details[
-                num_of_iterations
-                * self.batch_size_to_process : self.batch_size_to_process
-                * (num_of_iterations + 1)
-            ]
-            for crypto in crypto_parsed_html:
-                # Creating a parser object to parse the html.
-                crypto_parser = scraper_parsers.CoinMarketParser(crypto)
-                name, short_name = crypto_parser.get_name()
-                trade_in_dollars, trade_in_crypto = crypto_parser.get_volume()
-                crypto_info = {
-                    "name": name,
-                    "short_name": short_name,
-                    "price": crypto_parser.get_price(),
-                    "one_hour_change": crypto_parser.get_one_hour_change(),
-                    "one_day_change": crypto_parser.get_one_day_change(),
-                    "one_week_change": crypto_parser.get_one_week_change(),
-                    "market_cap": crypto_parser.get_market_cap(),
-                    "volume_in_dollars": trade_in_dollars,
-                    "volume_in_crypto": trade_in_crypto,
-                    "circulating_supply": crypto_parser.get_circulating_supply(),
-                }
-                parsed_results.append(crypto_info)
-            num_of_iterations = num_of_iterations + 1
+            try:
+                # Selecting the table based on the css class.
+                crypto_details_table = self.driver.find_element(
+                    By.CSS_SELECTOR, ".cmc-table"
+                )
+                # Selecting the table body that contains all the details about the crypto coins.
+                crypto_details_table_body = crypto_details_table.find_element(
+                    By.TAG_NAME, "tbody"
+                )
+                crypto_details = crypto_details_table_body.find_elements(By.TAG_NAME, "tr")
+                # Iterating in batches, to parse the crypto coins
+                crypto_parsed_html = crypto_details[
+                    num_of_iterations
+                    * self.batch_size_to_process : self.batch_size_to_process
+                    * (num_of_iterations + 1)
+                ]
+                for crypto in crypto_parsed_html:
+                    # Creating a parser object to parse the html.
+                    crypto_parser = scraper_parsers.CoinMarketParser(crypto)
+                    name, short_name = crypto_parser.get_name()
+                    trade_in_dollars, trade_in_crypto = crypto_parser.get_volume()
+                    crypto_info = {
+                        "name": name,
+                        "short_name": short_name,
+                        "price": crypto_parser.get_price(),
+                        "one_hour_change": crypto_parser.get_one_hour_change(),
+                        "one_day_change": crypto_parser.get_one_day_change(),
+                        "one_week_change": crypto_parser.get_one_week_change(),
+                        "market_cap": crypto_parser.get_market_cap(),
+                        "volume_in_dollars": trade_in_dollars,
+                        "volume_in_crypto": trade_in_crypto,
+                        "circulating_supply": crypto_parser.get_circulating_supply(),
+                    }
+                    parsed_results.append(crypto_info)
+            except (
+                selenium_exceptions.NoSuchElementException,
+                selenium_exceptions.UnexpectedTagNameException,
+                selenium_exceptions.TimeoutException,
+            ) as e:
+                logger.exception(
+                    "[Scrape Coin Market] Selenium raised an exception while scraping the website",
+                    exc_info=True, extra={"exception": str(e)}
+                )
+            except Exception as e:
+                logger.exception(
+                    "[Scrape Coin Market] Exception while scraping the website",
+                    exc_info=True, extra={"exception": str(e)}
+                )
+            finally:
+                num_of_iterations = num_of_iterations + 1
         return parsed_results
 
-    def parse_by_pagination(self):
+    def get_crypto_details_from_multiple_pages(self):
         """
-        Function to parse results from multiple pages.
+        Function to parse crypto details from multiple pages of coin market cap.
         """
         current_page = 1
         # Create an instance of the web driver
         self.get_web_driver_instance()
+
+        if not self.driver:
+            logger.error(
+                "[CoinMarketScraper] Web driver not initialized."
+            )
+            return
+
         # List to store all details about the crypto.
         list_of_all_cryptos = []
-
         # Continue till we reach the last page
         while True:
             # Scrape the current page
-            list_of_all_cryptos.extend(self.__scrape_coin_market())
+            list_of_all_cryptos.extend(self.scrape_coin_market())
             current_page = current_page + 1
             # Head on to the next page.
             self.get_web_driver_instance(query_params=f"page={current_page}")
