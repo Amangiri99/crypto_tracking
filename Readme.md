@@ -2,7 +2,13 @@
 
 ## Scrapes data from coin market cap using selenium
 
-## To use 
+## Application Demo
+https://github.com/Amangiri99/crypto_tracking/assets/44581374/d535fdf4-6a12-423d-9a4c-96b0405a744a
+
+## Scraper Demo 
+https://github.com/Amangiri99/crypto_tracking/assets/44581374/f5422ba5-fa37-438e-9f78-a5464b50ffc2
+
+## Prerequisites
 1. Setup postgres
 2. Setup Redis 
 
