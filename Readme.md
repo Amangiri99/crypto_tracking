@@ -3,6 +3,7 @@
 ## Scrapes data from coin market cap using selenium
 
 ## Application Demo
+Scrapes data from coin market cap after every 15 seconds.
 https://github.com/Amangiri99/crypto_tracking/assets/44581374/d535fdf4-6a12-423d-9a4c-96b0405a744a
 
 ## Scraper Demo 
